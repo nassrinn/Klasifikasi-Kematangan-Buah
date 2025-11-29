@@ -1,87 +1,71 @@
 import streamlit as st
-import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
+from PIL import Image
 
-# ============================
-#  MODEL SEDERHANA KNN
-# ============================
+st.title("🍎 Klasifikasi Kematangan Buah Berdasarkan Warna (Tanpa Library ML)")
+st.write("Aplikasi ini memprediksi tingkat kematangan buah berdasarkan warna dominan (RGB).")
 
-# Dataset warna buah (contoh sederhana)
-# format: [R, G, B]
-X = np.array([
-    [255, 0, 0],      # merah cerah - matang
-    [200, 30, 30],    # merah gelap - matang
-    [255, 165, 0],    # oranye - setengah matang
-    [255, 220, 100],  # kuning - setengah matang
-    [0, 255, 0],      # hijau - mentah
-    [50, 180, 50],    # hijau tua - mentah
-])
+# ======== FUNGSI KLASIFIKASI MANUAL =========
+def classify_fruit_color(r, g, b):
+    # Warna merah → matang
+    if r > 180 and g < 100 and b < 100:
+        return "Matang"
 
-# Label
-y = np.array([
-    "Matang",
-    "Matang",
-    "Setengah Matang",
-    "Setengah Matang",
-    "Mentah",
-    "Mentah",
-])
+    # Warna oranye/kuning → setengah matang
+    if r > 180 and g > 120 and b < 100:
+        return "Setengah Matang"
 
-# Train Model
-model = KNeighborsClassifier(n_neighbors=3)
-model.fit(X, y)
+    # Warna hijau → mentah
+    if g > r and g > b:
+        return "Mentah"
 
-# ============================
-#  STREAMLIT APP
-# ============================
+    return "Tidak diketahui (warna di luar pola umum)"
 
-st.title("🍎 Klasifikasi Kematangan Buah Berdasarkan Warna")
-st.write("Upload gambar atau pilih warna untuk memprediksi tingkat kematangan buah.")
+# ============================================
+#            PILIH MODE INPUT
+# ============================================
+mode = st.radio("Pilih metode input warna:", ["Upload Gambar", "Input Warna Manual"])
 
-# --- Pilihan Input ---
-mode = st.radio("Pilih metode input:", ["Upload Gambar", "Input Warna Manual"])
-
-# --------------------------
-#  INPUT 1 — UPLOAD GAMBAR
-# --------------------------
+# ============================================
+#            MODE 1: UPLOAD GAMBAR
+# ============================================
 if mode == "Upload Gambar":
-    file = st.file_uploader("Upload foto buah", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader("Upload gambar buah", type=["jpg", "jpeg", "png"])
 
-    if file:
-        import cv2
-        from PIL import Image
+    if uploaded_file:
+        img = Image.open(uploaded_file)
+        st.image(img, width=300, caption="Gambar yang diupload")
 
-        img = Image.open(file)
-        st.image(img, caption="Gambar yang diupload", width=300)
+        # Ambil warna rata-rata dengan mengecilkan gambar jadi 1x1 pixel
+        small_img = img.resize((1, 1))
+        dominant_color = small_img.getpixel((0, 0))  # (R, G, B)
 
-        # Convert ke numpy + ambil warna dominan sederhana
-        img_np = np.array(img)
-        avg_color = img_np.reshape(-1, 3).mean(axis=0).astype(int)
+        r, g, b = dominant_color
 
-        st.write(f"Rata-rata warna (RGB): {avg_color}")
+        st.write(f"### 🎨 Warna Dominan Gambar (RGB): {dominant_color}")
 
-        prediction = model.predict([avg_color])[0]
+        prediction = classify_fruit_color(r, g, b)
 
         st.subheader("📌 Hasil Prediksi")
         st.write(f"**Buah diprediksi:** {prediction}")
 
-# --------------------------
-#  INPUT 2 — PILIH WARNA MANUAL
-# --------------------------
+# ============================================
+#            MODE 2: INPUT WARNA MANUAL
+# ============================================
 else:
     color = st.color_picker("Pilih warna buah")
+    
+    # Convert HEX → RGB
+    r = int(color[1:3], 16)
+    g = int(color[3:5], 16)
+    b = int(color[5:7], 16)
 
-    # Convert hex ke RGB
-    rgb = tuple(int(color[i:i+2], 16) for i in (1, 3, 5))
-    st.write(f"RGB: {rgb}")
+    st.write(f"RGB: {(r, g, b)}")
 
-    prediction = model.predict([list(rgb)])[0]
+    prediction = classify_fruit_color(r, g, b)
 
     st.subheader("📌 Hasil Prediksi")
     st.write(f"**Buah diprediksi:** {prediction}")
 
-# ============================
-#  Footer
-# ============================
+# Footer
 st.markdown("---")
-st.caption("Aplikasi klasifikasi kematangan buah — Streamlit + KNN ML Model")
+st.caption("Aplikasi klasifikasi kematangan buah — Tanpa library ML, cocok untuk hosting Streamlit Cloud.")
