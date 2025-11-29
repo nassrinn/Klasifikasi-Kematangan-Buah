@@ -6,19 +6,25 @@ st.write("Aplikasi ini memprediksi tingkat kematangan buah berdasarkan warna dom
 
 # ======== FUNGSI KLASIFIKASI MANUAL =========
 def classify_fruit_color(r, g, b):
-    # Warna merah → matang
-    if r > 180 and g < 100 and b < 100:
+   def classify_fruit_color(r, g, b):
+    # ----- Matang (merah / merah gelap / kemerahan) -----
+    if (r > 150 and g < 120 and b < 120) or (r > 180 and g < 150):
         return "Matang"
 
-    # Warna oranye/kuning → setengah matang
-    if r > 180 and g > 120 and b < 100:
+    # ----- Setengah matang (oranye / kuning) -----
+    if (r > 170 and g > 140 and b < 120) or (r > 200 and g > 160):
         return "Setengah Matang"
 
-    # Warna hijau → mentah
-    if g > r and g > b:
+    # ----- Mentah (hijau / hijau kekuningan) -----
+    if (g > 120 and g > r and g > b) or (g > 150 and r < 120):
         return "Mentah"
 
-    return "Tidak diketahui (warna di luar pola umum)"
+    # ----- Kecoklatan (sering buah terlalu matang atau busuk) -----
+    if r > 100 and g < 80 and b < 60:
+        return "Cenderung Terlalu Matang / Coklat"
+
+    # Jika tidak masuk semua kategori
+    return "Tidak diketahui (warna unik / campuran)"
 
 # ============================================
 #            PILIH MODE INPUT
@@ -69,4 +75,5 @@ else:
 # Footer
 st.markdown("---")
 st.caption("Aplikasi klasifikasi kematangan buah — Tanpa library ML, cocok untuk hosting Streamlit Cloud.")
+
 
