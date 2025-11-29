@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 
-st.title("🍎 Klasifikasi Kematangan Buah Berdasarkan Warna (Tanpa Library ML)")
+st.title("🍎 Klasifikasi Kematangan Buah Berdasarkan Warna")
 st.write("Aplikasi ini memprediksi tingkat kematangan buah berdasarkan warna dominan (RGB).")
 
 # ======== FUNGSI KLASIFIKASI MANUAL =========
@@ -69,3 +69,4 @@ else:
 # Footer
 st.markdown("---")
 st.caption("Aplikasi klasifikasi kematangan buah — Tanpa library ML, cocok untuk hosting Streamlit Cloud.")
+
